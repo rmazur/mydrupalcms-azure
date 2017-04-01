@@ -202,34 +202,10 @@ abstract class Tasks {
    *   The options form array.
    */
   public function getFormOptions(array $database) {
-      
-    $connectstr_dbhost = '';
-    $connectstr_dbfullhost = '';
-    $connectstr_dbname = '';
-    $connectstr_dbusername = '';
-    $connectstr_dbpassword = '';
-    foreach ($_SERVER as $key => $value) {
-        if (strpos($key, "MYSQLCONNSTR_") !== 0) {
-            continue;
-        }
-        
-        $connectstr_dbfullhost = preg_replace("/^.*Data Source=(.+?);.*$/", "\\1", $value);
-        $connectstr_dbhost = substr($connectstr_dbfullhost, 0 , strpos($connectstr_dbfullhost ,":"));
-        $connectstr_dbname = preg_replace("/^.*Database=(.+?);.*$/", "\\1", $value);
-        $connectstr_dbusername = preg_replace("/^.*User Id=(.+?);.*$/", "\\1", $value);
-        $connectstr_dbpassword = preg_replace("/^.*Password=(.+?)$/", "\\1", $value);
-    }
-    //Port for MYSQL in-app or ClearDB 
-    $connectstr_port = getenv('WEBSITE_MYSQL_PORT');
-    if (empty($connectstr_port))
-    {
-      $connectstr_port= 3306;
-    }
-
     $form['database'] = array(
       '#type' => 'textfield',
       '#title' => t('Database name'),
-      '#default_value' => $connectstr_dbname,
+      '#default_value' => empty($database['database']) ? '' : $database['database'],
       '#size' => 45,
       '#required' => TRUE,
       '#states' => array(
@@ -242,7 +218,7 @@ abstract class Tasks {
     $form['username'] = array(
       '#type' => 'textfield',
       '#title' => t('Database username'),
-      '#default_value' => $connectstr_dbusername,
+      '#default_value' => empty($database['username']) ? '' : $database['username'],
       '#size' => 45,
       '#required' => TRUE,
       '#states' => array(
@@ -255,9 +231,8 @@ abstract class Tasks {
     $form['password'] = array(
       '#type' => 'password',
       '#title' => t('Database password'),
-      '#default_value' => $connectstr_dbpassword,
-      '#attributes' => array('value' => $connectstr_dbpassword),
-      '#required' => TRUE,
+      '#default_value' => empty($database['password']) ? '' : $database['password'],
+      '#required' => FALSE,
       '#size' => 45,
     );
 
@@ -281,17 +256,17 @@ abstract class Tasks {
     $form['advanced_options']['host'] = array(
       '#type' => 'textfield',
       '#title' => t('Host'),
-      '#default_value' => $connectstr_dbhost,
+      '#default_value' => empty($database['host']) ? 'localhost' : $database['host'],
       '#size' => 45,
       // Hostnames can be 255 characters long.
       '#maxlength' => 255,
       '#required' => TRUE,
     );
-  
+
     $form['advanced_options']['port'] = array(
       '#type' => 'number',
       '#title' => t('Port number'),
-      '#default_value' => $connectstr_port,
+      '#default_value' => empty($database['port']) ? '' : $database['port'],
       '#min' => 0,
       '#max' => 65535,
     );
